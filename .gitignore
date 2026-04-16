@@ -1,0 +1,21 @@
+# Dependencies
+client/node_modules/
+server/node_modules/
+
+# Environment secrets
+server/.env
+client/.env
+*.env.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Build artifacts
+client/dist/
+server/dist/
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
