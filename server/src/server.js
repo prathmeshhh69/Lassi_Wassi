@@ -70,6 +70,10 @@ const startServer = async () => {
       if (userId) socket.join(`user:${userId}`);
     });
 
+    socket.on("leaveUserRoom", (userId) => {
+      if (userId) socket.leave(`user:${userId}`);
+    });
+
     socket.on("disconnect", () => {});
   });
 

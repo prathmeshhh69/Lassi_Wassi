@@ -75,13 +75,39 @@ export const updateOrderStatus = async (req, res, next) => {
     order.status = status;
     await order.save();
 
+    const populatedOrder = await Order.findById(order._id)
+      .populate("user", "name email phone")
+      .populate("restaurant", "name");
+
     // Notify the customer who placed this order
     try {
-      getIO().to(`user:${order.user}`).emit("orderStatusUpdated", {
-        orderId:    order._id,
+      const userId = populatedOrder?.user?._id?.toString?.() || order.user.toString();
+
+      getIO().to(`user:${userId}`).emit("orderStatusUpdated", {
+        orderId: order._id,
         status,
         restaurantId: order.restaurant,
+        orderType: populatedOrder?.orderType,
+        fulfillmentType: populatedOrder?.fulfillmentType,
       });
+
+      if (status === "out_for_delivery") {
+        const customerName = populatedOrder?.user?.name || "Customer";
+        const restaurantName = populatedOrder?.restaurant?.name || "our restaurant";
+        const isPickup = populatedOrder?.fulfillmentType === "pickup";
+
+        getIO().to(`user:${userId}`).emit("orderOutForDelivery", {
+          orderId: order._id,
+          restaurantId: order.restaurant,
+          restaurantName,
+          orderType: populatedOrder?.orderType,
+          fulfillmentType: populatedOrder?.fulfillmentType,
+          title: `${restaurantName} update`,
+          body: isPickup
+            ? `${customerName}, please collect from our restaurant.`
+            : `${customerName}, your delivery partner is here please collect your order.`,
+        });
+      }
     } catch (_) {}
 
     return res.status(200).json({ success: true, data: order });
