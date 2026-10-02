@@ -14,9 +14,11 @@ import { setIO } from "./utils/socket.js";
 
 const app = express();
 
+const allowedOrigins = env.corsOrigin.length > 0 ? env.corsOrigin : ["http://localhost:5173"];
+
 app.use(
   cors({
-    origin: env.corsOrigin,
+    origin: allowedOrigins,
     credentials: true
   })
 );
@@ -44,13 +46,14 @@ const startServer = async () => {
 
   const PORT = process.env.PORT || 5000;
   const NODE_ENV = process.env.NODE_ENV || "development";
+  const HOST = env.host || "0.0.0.0";
 
   // Create HTTP server so Socket.IO can share the same port
   const httpServer = http.createServer(app);
 
   const io = new SocketIOServer(httpServer, {
     cors: {
-      origin: env.corsOrigin || "http://localhost:5173",
+      origin: allowedOrigins,
       methods: ["GET", "POST"],
       credentials: true,
     },
@@ -77,13 +80,14 @@ const startServer = async () => {
     socket.on("disconnect", () => {});
   });
 
-  httpServer.listen(PORT, () => {
-    console.log(`Server running in ${NODE_ENV} mode on port ${PORT}`);
+  httpServer.listen(PORT, HOST, () => {
+    console.log(`Server running in ${NODE_ENV} mode on ${HOST}:${PORT}`);
   });
 };
 
 startServer().catch((err) => {
   console.error("Failed to start server:", err);
+  console.log(process.env.MONGO_URI);
   process.exit(1);
 });
 

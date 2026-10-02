@@ -50,29 +50,38 @@ async function seed() {
   await mongoose.connect(uri);
   console.log("✅  MongoDB connected");
 
-  // Check for existing account
-  const existing = await User.findOne({ email: OWNER.email });
-
-  if (existing) {
-    console.log(`ℹ️   Owner account already exists (${OWNER.email}). Nothing was changed.`);
-    await mongoose.disconnect();
-    process.exit(0);
-  }
-
   // Hash password
   const salt           = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(OWNER.password, salt);
 
-  // Create owner
-  await User.create({
-    name:     OWNER.name,
-    email:    OWNER.email,
-    password: hashedPassword,
-    phone:    OWNER.phone,
-    role:     OWNER.role,
-  });
+  // Create or repair the owner account so the seeded login always works.
+  const existing = await User.findOne({ email: OWNER.email });
 
-  console.log("🎉  Owner account created successfully!");
+  if (existing) {
+    await User.updateOne(
+      { email: OWNER.email },
+      {
+        $set: {
+          name: OWNER.name,
+          password: hashedPassword,
+          phone: OWNER.phone,
+          role: OWNER.role,
+        },
+      }
+    );
+
+    console.log(`✅  Owner account updated successfully (${OWNER.email}).`);
+  } else {
+    await User.create({
+      name:     OWNER.name,
+      email:    OWNER.email,
+      password: hashedPassword,
+      phone:    OWNER.phone,
+      role:     OWNER.role,
+    });
+
+    console.log("🎉  Owner account created successfully!");
+  }
   console.log(`    Email   : ${OWNER.email}`);
   console.log(`    Password: ${OWNER.password}`);
   console.log(`    Role    : ${OWNER.role}`);

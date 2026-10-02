@@ -1,7 +1,9 @@
 import axios from "axios";
 
+const apiBaseUrl = import.meta.env.VITE_API_URL?.trim() || "http://localhost:5000";
+
 const api = axios.create({
-    baseURL: "http://localhost:5000",
+    baseURL: apiBaseUrl,
 });
 
 // Handle 401 responses globally — dispatch a custom event so AuthContext
