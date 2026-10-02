@@ -15,7 +15,7 @@ const SOCKET_URL = import.meta.env.VITE_API_URL || window.location.origin;
 
 function playNotificationSound() {
   try {
-    const audio = new Audio("/notification.mp3");
+    const audio = new Audio(`${import.meta.env.BASE_URL}notification.mp3`);
     audio.volume = 0.7;
     const promise = audio.play();
     if (promise) {

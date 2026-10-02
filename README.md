@@ -68,6 +68,14 @@ npm run dev
 
 The app should open on `http://localhost:5173`.
 
+## Deploy the frontend to GitHub Pages
+
+The GitHub Actions workflow in `.github/workflows/deploy-pages.yml` builds and deploys the React frontend whenever changes are pushed to `main`. In the repository settings, set **Pages → Build and deployment → Source** to **GitHub Actions**.
+
+The Express API is not hosted by GitHub Pages. Deploy the `server/` app and its MongoDB database separately, then add the server's public URL as the repository Actions variable `VITE_API_URL` under **Settings → Secrets and variables → Actions → Variables**. The API server must allow the published Pages origin in its CORS configuration. Without `VITE_API_URL`, the frontend uses `http://localhost:5000`, which only works during local development.
+
+The workflow supports both project Pages URLs and user or organization Pages URLs, and publishes a fallback page so direct navigation to app routes works.
+
 ## Testing the App
 
 1. Open the customer site in the browser.

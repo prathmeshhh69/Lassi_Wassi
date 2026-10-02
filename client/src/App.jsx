@@ -42,7 +42,7 @@ function App() {
     <AuthProvider>
       <CartProvider>
         <SocketProvider>
-        <Router>
+        <Router basename={import.meta.env.BASE_URL}>
           <Routes>
             {/* ── Public ─────────────────────────────────── */}
             <Route path="/"           element={<Home />} />
